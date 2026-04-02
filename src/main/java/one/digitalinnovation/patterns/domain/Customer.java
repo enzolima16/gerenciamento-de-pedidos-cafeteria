@@ -13,7 +13,7 @@ public class Customer {
     private Long customerId;
 
     @Column(nullable = false, length = 50)
-    private String nome;
+    private String name;
 
     @Column(nullable = false, length = 11, unique = true)
     private String cpf;
