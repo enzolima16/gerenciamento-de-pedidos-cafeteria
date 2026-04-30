@@ -2,7 +2,6 @@ package one.digitalinnovation.patterns.controller;
 
 import lombok.RequiredArgsConstructor;
 import one.digitalinnovation.patterns.domain.Order;
-import one.digitalinnovation.patterns.domain.OrderItem;
 import one.digitalinnovation.patterns.domain.OrderStatus;
 import one.digitalinnovation.patterns.service.OrderService;
 import org.springframework.http.HttpStatus;
