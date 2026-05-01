@@ -2,6 +2,8 @@ package one.digitalinnovation.patterns.service;
 
 import lombok.RequiredArgsConstructor;
 import one.digitalinnovation.patterns.domain.Customer;
+import one.digitalinnovation.patterns.dto.CustomerRequest;
+import one.digitalinnovation.patterns.dto.CustomerResponse;
 import one.digitalinnovation.patterns.exception.ResourceNotFoundException;
 import one.digitalinnovation.patterns.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
@@ -11,47 +13,40 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
+
     private final CustomerRepository customerRepository;
 
-    public List<Customer> findAllCustomers() {
-        return customerRepository.findAll();
+    public List<CustomerResponse> findAllCustomers() {
+        return customerRepository.findAll()
+                .stream()
+                .map(CustomerResponse::from)
+                .toList();
     }
 
-    public Customer findCustomerById(Long id) {
-        return customerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado."));
+    public CustomerResponse findCustomerById(Long id) {
+        return CustomerResponse.from(getCustomerOrThrow(id));
     }
 
-    public Customer createCustomer(Customer customer) {
-        validateCustomer(customer);
-        return customerRepository.save(customer);
+    public CustomerResponse createCustomer(CustomerRequest request) {
+        Customer customer = new Customer();
+        customer.setName(request.name());
+        customer.setCpf(request.cpf());
+        return CustomerResponse.from(customerRepository.save(customer));
     }
 
-    public Customer updateCustomer(Long id, Customer updatedCustomer) {
-        Customer existingCostumer = findCustomerById(id);
-
-        existingCostumer.setName(updatedCustomer.getName());
-        existingCostumer.setCpf(updatedCustomer.getCpf());
-        validateCustomer(existingCostumer);
-        return customerRepository.save(existingCostumer);
+    public CustomerResponse updateCustomer(Long id, CustomerRequest request) {
+        Customer customer = getCustomerOrThrow(id);
+        customer.setName(request.name());
+        customer.setCpf(request.cpf());
+        return CustomerResponse.from(customerRepository.save(customer));
     }
 
     public void deleteCustomer(Long id) {
-        Customer customer = findCustomerById(id);
-        customerRepository.delete(customer);
+        customerRepository.delete(getCustomerOrThrow(id));
     }
 
-    private void validateCustomer(Customer customer) {
-        if (customer.getName() == null || customer.getName().trim().isEmpty()) {
-            throw new ResourceNotFoundException("O nome é obrigatório");
-        }
-
-        if (customer.getCpf() == null || customer.getCpf().trim().isEmpty()) {
-            throw new ResourceNotFoundException("CPF é obrigatório");
-        }
-
-        if (customer.getCpf().length() != 11) {
-            throw new ResourceNotFoundException("CPF inválido");
-        }
+    public Customer getCustomerOrThrow(Long id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
     }
 }
