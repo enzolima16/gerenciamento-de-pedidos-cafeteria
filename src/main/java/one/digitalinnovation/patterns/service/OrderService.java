@@ -6,6 +6,10 @@ import one.digitalinnovation.patterns.dto.OrderItemRequest;
 import one.digitalinnovation.patterns.dto.OrderResponse;
 import one.digitalinnovation.patterns.exception.ResourceNotFoundException;
 import one.digitalinnovation.patterns.repository.OrderRepository;
+import one.digitalinnovation.patterns.service.factory.PaymentStrategyFactory;
+import one.digitalinnovation.patterns.strategy.PaymentStrategy;
+import one.digitalinnovation.patterns.strategy.PaymentType;
+
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,6 +24,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CustomerService customerService;
     private final ProductService productService;
+    private final PaymentStrategyFactory paymentStrategyFactory;
 
     public List<OrderResponse> findAll() {
         return orderRepository.findAll()
@@ -79,5 +84,17 @@ public class OrderService {
                 .map(OrderItem::getSubTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setTotal(total);
+    }
+
+    public void processPayment(Long orderId, PaymentType type) {
+    Order order = getOrderOrThrow(orderId);
+
+    PaymentStrategy strategy = paymentStrategyFactory.getStrategy(type);
+
+    strategy.processPayment();
+
+    order.setStatus(OrderStatus.PAID);
+
+    orderRepository.save(order);
     }
 }
