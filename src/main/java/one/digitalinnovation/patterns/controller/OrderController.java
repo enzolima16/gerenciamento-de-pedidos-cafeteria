@@ -6,6 +6,8 @@ import one.digitalinnovation.patterns.domain.OrderStatus;
 import one.digitalinnovation.patterns.dto.OrderItemRequest;
 import one.digitalinnovation.patterns.dto.OrderResponse;
 import one.digitalinnovation.patterns.service.OrderService;
+import one.digitalinnovation.patterns.strategy.PaymentType;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,5 +46,12 @@ public class OrderController {
     public ResponseEntity<OrderResponse> updateOrderStatus(@PathVariable Long id,
                                                            @RequestParam OrderStatus newStatus) {
         return ResponseEntity.ok(orderService.updateOrderStatus(id, newStatus));
+    }
+
+    @PostMapping("/{id}/pay")
+    public ResponseEntity<Void> pay(@PathVariable Long id, 
+        @RequestParam PaymentType type){
+        orderService.processPayment(id, type);
+        return ResponseEntity.ok().build();
     }
 }
