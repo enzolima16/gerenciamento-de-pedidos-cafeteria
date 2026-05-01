@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import one.digitalinnovation.patterns.domain.Customer;
 import one.digitalinnovation.patterns.service.CustomerService;
@@ -14,7 +13,7 @@ import one.digitalinnovation.patterns.service.CustomerService;
 @RestController
 @RequestMapping("/customers")
 @RequiredArgsConstructor
-public class CustumerController {
+public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping
@@ -30,7 +29,7 @@ public class CustumerController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Customer> createCostumer (@RequestBody Customer costumer) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(customerService.createCustomer(costumer));
+        return ResponseEntity.status(HttpStatus.CREATED).body(customerService.createCustomer(costumer));
     }
 
     @PutMapping("/{id}")

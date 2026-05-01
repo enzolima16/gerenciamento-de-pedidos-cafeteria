@@ -29,8 +29,8 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Order> createProduct (@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(id));
+    public ResponseEntity<Order> createOrder (@RequestParam Long customerId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(customerId));
     }
 
     @PostMapping("/{id}/items")
