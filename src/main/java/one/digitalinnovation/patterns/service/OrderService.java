@@ -2,10 +2,10 @@ package one.digitalinnovation.patterns.service;
 
 import lombok.RequiredArgsConstructor;
 import one.digitalinnovation.patterns.domain.*;
+import one.digitalinnovation.patterns.dto.OrderItemRequest;
+import one.digitalinnovation.patterns.dto.OrderResponse;
 import one.digitalinnovation.patterns.exception.ResourceNotFoundException;
-import one.digitalinnovation.patterns.repository.CustomerRepository;
 import one.digitalinnovation.patterns.repository.OrderRepository;
-import one.digitalinnovation.patterns.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -16,23 +16,24 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+
     private final OrderRepository orderRepository;
-    private final CustomerRepository customerRepository;
-    private final ProductRepository productRepository;
+    private final CustomerService customerService;
+    private final ProductService productService;
 
-    public List<Order> findAll() {
-        return orderRepository.findAll();
+    public List<OrderResponse> findAll() {
+        return orderRepository.findAll()
+                .stream()
+                .map(OrderResponse::from)
+                .toList();
     }
 
-    public Order findById(Long id) {
-        return orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado."));
+    public OrderResponse findById(Long id) {
+        return OrderResponse.from(getOrderOrThrow(id));
     }
 
-    public Order createOrder(Long customerId) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado."));
-
+    public OrderResponse createOrder(Long customerId) {
+        Customer customer = customerService.getCustomerOrThrow(customerId);
         Order order = Order.builder()
                 .customer(customer)
                 .status(OrderStatus.RECEIVED)
@@ -40,37 +41,37 @@ public class OrderService {
                 .createdAt(LocalDateTime.now())
                 .items(new ArrayList<>())
                 .build();
-        return orderRepository.save(order);
+        return OrderResponse.from(orderRepository.save(order));
     }
 
-    public Order addItemToOrder(Long orderId, Long productId, Integer quantity) {
-        Order order = findById(orderId);
+    public OrderResponse addItemToOrder(Long orderId, OrderItemRequest request) {
+        Order order = getOrderOrThrow(orderId);
+        Product product = productService.getProductOrThrow(request.productId());
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado."));
-        if (quantity == null || quantity <= 0) {
-            throw new ResourceNotFoundException("A quantidade deve ser maior que zero.");
-        }
-
-        BigDecimal subTotal = product.getPrice().multiply(BigDecimal.valueOf(quantity));
+        BigDecimal subTotal = product.getPrice().multiply(BigDecimal.valueOf(request.quantity()));
 
         OrderItem orderItem = OrderItem.builder()
                 .order(order)
                 .product(product)
-                .quantity(quantity)
+                .quantity(request.quantity())
                 .unitPrice(product.getPrice())
                 .subTotal(subTotal)
                 .build();
+
         order.getItems().add(orderItem);
         recalculateOrderTotal(order);
-
-        return orderRepository.save(order);
+        return OrderResponse.from(orderRepository.save(order));
     }
 
-    public Order updateOrderStatus(Long orderId, OrderStatus newStatus) {
-        Order order = findById(orderId);
+    public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus) {
+        Order order = getOrderOrThrow(orderId);
         order.setStatus(newStatus);
-        return orderRepository.save(order);
+        return OrderResponse.from(orderRepository.save(order));
+    }
+
+    private Order getOrderOrThrow(Long id) {
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado"));
     }
 
     private void recalculateOrderTotal(Order order) {

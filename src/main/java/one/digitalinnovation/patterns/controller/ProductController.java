@@ -1,7 +1,8 @@
 package one.digitalinnovation.patterns.controller;
 
 import lombok.RequiredArgsConstructor;
-import one.digitalinnovation.patterns.domain.Product;
+import one.digitalinnovation.patterns.dto.ProductRequest;
+import one.digitalinnovation.patterns.dto.ProductResponse;
 import one.digitalinnovation.patterns.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,24 +17,24 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
+    public ResponseEntity<List<ProductResponse>> getAllProducts() {
         return ResponseEntity.ok(productService.findAllProducts());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.findProductById(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest product) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService
             .createProduct(product));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
+    public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductRequest product) {
         return ResponseEntity.ok(productService.updateProduct(id, product));
     }
 
