@@ -2,6 +2,7 @@ package one.digitalinnovation.patterns.service;
 
 import lombok.RequiredArgsConstructor;
 import one.digitalinnovation.patterns.domain.Customer;
+import one.digitalinnovation.patterns.exception.ResourceNotFoundException;
 import one.digitalinnovation.patterns.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class CustomerService {
 
     public Customer findCustomerById(Long id) {
         return customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado."));
     }
 
     public Customer createCustomer(Customer customer) {
@@ -42,15 +43,15 @@ public class CustomerService {
 
     private void validateCustomer(Customer customer) {
         if (customer.getName() == null || customer.getName().trim().isEmpty()) {
-            throw new RuntimeException("O nome é obrigatório");
+            throw new ResourceNotFoundException("O nome é obrigatório");
         }
 
         if (customer.getCpf() == null || customer.getCpf().trim().isEmpty()) {
-            throw new RuntimeException("CPF é obrigatório");
+            throw new ResourceNotFoundException("CPF é obrigatório");
         }
 
         if (customer.getCpf().length() != 11) {
-            throw new RuntimeException("CPF inválido");
+            throw new ResourceNotFoundException("CPF inválido");
         }
     }
 }

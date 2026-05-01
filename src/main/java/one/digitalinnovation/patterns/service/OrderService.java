@@ -2,6 +2,7 @@ package one.digitalinnovation.patterns.service;
 
 import lombok.RequiredArgsConstructor;
 import one.digitalinnovation.patterns.domain.*;
+import one.digitalinnovation.patterns.exception.ResourceNotFoundException;
 import one.digitalinnovation.patterns.repository.CustomerRepository;
 import one.digitalinnovation.patterns.repository.OrderRepository;
 import one.digitalinnovation.patterns.repository.ProductRepository;
@@ -25,12 +26,12 @@ public class OrderService {
 
     public Order findById(Long id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado."));
     }
 
     public Order createOrder(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado."));
 
         Order order = Order.builder()
                 .customer(customer)
@@ -46,9 +47,9 @@ public class OrderService {
         Order order = findById(orderId);
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado."));
         if (quantity == null || quantity <= 0) {
-            throw new RuntimeException("A quantidade deve ser maior que zero.");
+            throw new ResourceNotFoundException("A quantidade deve ser maior que zero.");
         }
 
         BigDecimal subTotal = product.getPrice().multiply(BigDecimal.valueOf(quantity));
