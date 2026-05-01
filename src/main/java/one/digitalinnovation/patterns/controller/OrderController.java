@@ -49,7 +49,7 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/pay")
-    public ResponseEntity<Void> pay(@PathVariable Long id, 
+    public ResponseEntity<String> pay(@PathVariable Long id, 
         @RequestParam PaymentType type){
         orderService.processPayment(id, type);
         return ResponseEntity.ok().build();

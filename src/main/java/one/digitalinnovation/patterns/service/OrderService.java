@@ -86,15 +86,15 @@ public class OrderService {
         order.setTotal(total);
     }
 
-    public void processPayment(Long orderId, PaymentType type) {
+    public String processPayment(Long orderId, PaymentType type) {
     Order order = getOrderOrThrow(orderId);
 
     PaymentStrategy strategy = paymentStrategyFactory.getStrategy(type);
 
-    strategy.processPayment();
-
     order.setStatus(OrderStatus.PAID);
 
     orderRepository.save(order);
+
+    return strategy.processPayment();
     }
 }
